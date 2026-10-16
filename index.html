@@ -159,7 +159,7 @@
       margin:0;
       /* LATAR BELAKANG MENGGUNAKAN FOTO  */
       
-      background: url('asset/kumat.png');
+      background: url('asset/kumat.jpg');
       background-position: center center;
       background-repeat: no-repeat;
 
@@ -357,11 +357,34 @@
     #screen-game.view-screen.active {
       display: flex !important;
       flex-direction: column;
-      align-items: center;
-      justify-content: space-between;
-      max-width: 450px !important;
-      width: 95vw !important;
-      height: 85vh !important;
+      align-items: stretch;
+      justify-content: flex-start;
+
+      position: fixed;
+      inset: 0;
+
+      width: 100vw !important;
+      height: 100vh !important;
+      max-width: none !important;
+      margin: 0 !important;
+      padding: 0 !important;
+
+      background: #000;
+        border: none !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+
+      z-index: 99999;
+      overflow: hidden;
+    }
+
+    #construct-game-frame {
+      display: block;
+      width: 100% !important;
+      height: 100% !important;
+      flex: 1;
+      border: none;
+      border-radius: 0 !important;
     }
 
     @keyframes fadeIn {
@@ -422,19 +445,7 @@
     .btn-teacher { background: #fdcb6e; color: white; box-shadow: none ; }
 
     /* KANVAS PAPAN KAYU */
-    #gameCanvas { 
-      background: #0f172a; 
-      border: 4px solid #334155; 
-      border-radius: 16px; 
-      cursor: crosshair; 
-      box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
-      width: 90vw !important;
-      max-width: 400px !important;
-      height: 60vh !important;
-      max-height: 550px !important;
-      touch-action: none;
-      object-fit: contain;
-    }
+   
 /* Sesuaikan padding container di layar HP */
     @media (max-width: 300px) {
   .view-screen {
@@ -532,9 +543,13 @@
   <!-- LOADING SCREEN -->
    
   <div id="loading-screen">
+
     <div class="loading-content">
-      <div class="loading-title">SNAKE-QUIZ</div>
-      <div class="loading-subtitle">Inovasi Game Web Edukatif Berbasis Multiplayer Snake-Quiz sebagai Media Belajar Interaktif yang Menyenangkan</div>
+      <div class="loading-mascot">
+        <img src="asset/woi.png" alt="Mascot" style="width: 200px; height: auto; filter: drop-shadow(0 6px 10px rgba(0,0,0,0.3));">
+     </div>
+      <div class="loading-title">MAZE-GAME</div>
+      <div class="loading-subtitle"> Navigate the Maze, Master the Knowledge</div>
 
       <div class="progress-wrapper">
         <div class="progress-header">
@@ -551,7 +566,7 @@
   <header>
   
     <div class="logo">  
-      Snake Quiz
+      Maze Game
     </div>
     <div class="header-controls">
       <button class="btn-music-toggle" id="btn-music" onclick="toggleMusic()">
@@ -581,10 +596,10 @@
   <main>
     <div id="screen-home" class="view-screen active">
       <div style="text-align: center; margin-bottom: 5px;">
-        <img src="asset/ular33.png" alt="Snake" style="width: 100px; height: auto; filter: drop-shadow(0px 4px 4px rgba(0,0,0,0.4));">
+        <img src="asset/kepo.png" alt="Snake" style="width: 300px; height: auto; filter: drop-shadow(0px 4px 4px rgba(0,0,0,0.4));">
       </div>
       
-      <h2>Welcome, Adventure!</h2>
+      
 
       <div class="form-group">
         <label for="player-name">Username:</label>
@@ -602,12 +617,22 @@
     </div>
 
     <div id="screen-game" class="view-screen wide">
-      <div class="game-hud">
-        <div class="hud-badge"><span id="hud-length">15</span> cm</div>
-        <div class="hud-badge"><span id="hud-score">0</span> Poin</div>
-        <div class="hud-badge"><span id="hud-correct">0</span> Benar</div>
-      </div>
-      <canvas id="gameCanvas" width="700" height="400"></canvas>
+      
+      <!-- Tempat Game Construct dipanggil -->
+      <iframe
+        id="construct-game-frame"
+        src="maze/index.html"
+        allow="autoplay; fullscreen"
+        tabindex="0"
+        style="
+          display: block;
+          width: 100%;
+          height: calc(100vh - 55px);
+          border: none;
+          border-radius: 0;
+        ">
+      </iframe>
+      
       <button class="btn-menu" style="margin-top: 15px;" onclick="showScreen('screen-home')">EXIT</button>
     </div>
 
@@ -719,22 +744,6 @@
     </div>
   </div>
 
-  <div id="modal-question" class="modal hidden">
-    <div class="modal-content">
-      <h3 style="margin-bottom: 10px; color:#6c5ce7;">Question</h3>
-      <p id="q-text" style="font-size: 1.1rem; font-weight: bold; margin-bottom: 15px;">Soal...</p>
-      <div id="q-options" class="opts-grid"></div>
-    </div>
-  </div>
-
-  <div id="modal-result" class="modal hidden">
-    <div id="result-box" class="modal-content">
-      <div id="result-icon" style="font-size: 3.5rem; margin-bottom: 10px;">🎉</div>
-      <h3 id="result-title" style="margin-bottom: 10px;">Correct Answer!</h3>
-      <p id="result-msg" style="font-size: 1.05rem; margin-bottom: 20px; font-weight: bold; color: #636e72;">snake lenght +3 cm,+10 points</p>
-      <button class="btn-menu btn-primary" onclick="closeResultModal()">Next</button>
-    </div>
-  </div>
 
   <div id="modal-victory" class="modal hidden">
     <div class="modal-content" style="border-width: 5px; border-color: #fdcb6e;">
@@ -897,17 +906,22 @@
 
     function toggleMusic() {
       const musicBtn = document.getElementById('btn-music');
-      isMusicOn = !isMusicOn;
+      
       const bgm = document.getElementById('bgm');
 
+      isMusicOn = !isMusicOn;
+      
       if (isMusicOn) {
     // Tampilan saat Musik ON
-        bgm.play();
+        
+        bgm.play().catch(() => {});
         musicBtn.innerHTML = `<img src="asset/3.png" class="icon-img"> Music: ON`;
       } else {
     // Tampilan saat Musik OFF
         bgm.pause();
-        musicBtn.innerHTML = `<img src="asset/6.png" class="icon-img"> Music: OFF`;
+        bgm.currentTime = 0;
+        musicBtn.innerHTML = 
+          `<img src="asset/6.png" class="icon-img"> Music: OFF`;
       }
     }
 
@@ -933,15 +947,19 @@
             
             // Putar musik otomatis setelah loading selesai
             bgm.volume = 0.4;
-            bgm.play().then(() => {
-              isMusicPlaying = true;
-              document.getElementById('btn-music').innerHTML = `<img src="asset/3.png" class="icon-img"> Music: ON`;
-            }).catch(() => {
-              // Jika diblokir browser, pengguna bisa mengaktifkannya lewat tombol musik di atas
-              isMusicPlaying = false;
-              document.getElementById('btn-music').innerHTML = `<img src="asset/6.png" class="icon-img"> Music: OFF`;
-            });
 
+            if (isMusicOn) {
+              bgm.play().then(() => {
+                isMusicPlaying = true;
+              document.getElementById('btn-music').innerHTML =
+                `<img src="asset/3.png" class="icon-img"> Music: ON`;
+            }).catch(() => {
+              isMusicPlaying = false;
+              document.getElementById('btn-music').innerHTML =
+                `<img src="asset/6.png" class="icon-img"> Music: OFF`;
+            });
+          }
+          
           }, 400);
         }
       }, 35);
@@ -951,16 +969,30 @@
 
     function toggleDarkMode() { document.body.classList.toggle('dark-mode'); }
 
+
     function showScreen(screenId) {
       document.querySelectorAll('.view-screen').forEach(s => s.classList.remove('active'));
       document.getElementById('modal-victory').classList.add('hidden');
       document.getElementById(screenId).classList.add('active');
 
-      if (screenId === 'screen-game') startGame();
-      else if (screenId === 'screen-teacher') renderTeacherData();
-      else if (screenId === 'screen-leaderboard') renderLeaderboard();
-      else if (screenId === 'screen-manage-materi') renderQuestionList();
+      const bgm = document.getElementById('bgm');
+
+      if (screenId === 'screen-game') {
+    // Hentikan musik Snake Quiz saat masuk ke Maze
+        bgm.pause();
+        startGame();
+      } else {
+    // Putar kembali musik Snake Quiz saat keluar dari Maze
+        if (isMusicOn) {
+          bgm.play().catch(() => {});
+        }
+
+        if (screenId === 'screen-teacher') renderTeacherData();
+        else if (screenId === 'screen-leaderboard') renderLeaderboard();
+        else if (screenId === 'screen-manage-materi') renderQuestionList();
+      }
     }
+
 
     function validateAndStartGame() {
       const inputCode = document.getElementById('room-code').value.trim().toUpperCase();
@@ -971,6 +1003,9 @@
         return;
       }
 
+      // Simpan nama pemain ke variabel global agar bisa dipakai saat simpan skor
+      currentPlayerName = inputName;
+
   // Cek ketersediaan room di Firebase Online
       db.ref('rooms/' + inputCode).once('value', (snapshot) => {
         if (snapshot.exists()) {
@@ -980,7 +1015,7 @@
           showAlert("Kode Room (" + inputCode + ") tidak ditemukan!", "Room Gagal Dimasuki", "❌");
         }
       });
-   }
+    }
 
     function openTeacherLogin() {
       document.getElementById('teacher-pin-input').value = '';
@@ -1076,298 +1111,43 @@
       document.getElementById('modal-info').classList.add('hidden');
     }
 
-    /* GAME ENGINE */
-    let player = { name: "Siswa SMP", length: 15, score: 0, correct: 0, x: 200, y: 200, speed: 2.5 };
-    let snakeTrail = [];
-    let targetMouse = { x: 200, y: 200 };
-    let bubbles = [];
-    let canvas, ctx, animId;
-    let isModalOpen = false;
+    /* INTERFACE KE GAME CONSTRUCT */
+    let currentPlayerName = "";
 
     function startGame() {
-      canvas = document.getElementById('gameCanvas');
-      ctx = canvas.getContext('2d');
-      canvas.width = 400;
-      canvas.height = 650;
-      player.name = document.getElementById('player-name').value || "Siswa SMP";
-      player.length = 15;
-      player.score = 0;
-      player.correct = 0;
-      isModalOpen = false;
-      
-      document.getElementById('modal-victory').classList.add('hidden');
+      // Refresh iframe Construct saat game dimulai
+      const frame = document.getElementById('construct-game-frame');
+      if (frame) {
+        frame.src = frame.src;
+      }
+    }
 
-      player.x = canvas.width / 2;
-      player.y = canvas.height / 2;
-      snakeTrail = [];
-      targetMouse = { x: player.x, y: player.y };
-      
-      bubbles = questions.map((q, index) => ({
-        id: index + 1,
-        x: Math.floor(80 + Math.random() * (canvas.width - 160)),
-        y: Math.floor(80 + Math.random() * (canvas.height - 160)),
-        q: q
-      }));
+    // Menerima skor dari Construct saat game selesai
+    window.addEventListener('message', function(event) {
+      if (event.data && event.data.type === 'GAME_OVER') {
+        const finalScore = event.data.score || 0;
+        const finalCorrect = event.data.correct || 0;
+    
+        saveScoreToFirebase(finalScore, finalCorrect);
+      }
+    });
 
-      // Fungsi pembantu untuk menghitung posisi sentuh/klik sesuai ukuran canvas
-function updateInputPosition(clientX, clientY) {
-  const rect = canvas.getBoundingClientRect();
-  const scaleX = canvas.width / rect.width;
-  const scaleY = canvas.height / rect.height;
+    function saveScoreToFirebase(score, correct) {
+      if (!activeRoomCode) return;
   
-  targetMouse.x = (clientX - rect.left) * scaleX;
-  targetMouse.y = (clientY - rect.top) * scaleY;
-}
+  // Gunakan nama pemain yang diinput, bersihkan spasi
+      const safeName = (currentPlayerName || "Siswa").replace(/\s+/g, '_');
+      const studentKey = safeName + '_' + Math.floor(100 + Math.random() * 900);
 
-// Kontrol Mouse (Laptop)
-canvas.onmousemove = (e) => {
-  updateInputPosition(e.clientX, e.clientY);
-};
-
-// Kontrol Touchscreen (HP)
-canvas.ontouchstart = (e) => {
-  if (e.touches.length > 0) {
-    updateInputPosition(e.touches[0].clientX, e.touches[0].clientY);
-  }
-};
-
-canvas.ontouchmove = (e) => {
-  e.preventDefault(); // Biar layar HP enggak ikut ke-scroll saat main
-  if (e.touches.length > 0) {
-    updateInputPosition(e.touches[0].clientX, e.touches[0].clientY);
-  }
-};
-
-      if (animId) cancelAnimationFrame(animId);
-      loop();
-    }
-
-    function loop() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      ctx.fillStyle = "#111418";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
-      ctx.lineWidth = 1;
-      for (let x = 0; x < canvas.width; x += 35) {
-        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
-      }
-      for (let y = 0; y < canvas.height; y += 35) {
-        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
-      }
-
-      // Hitung sudut rotasi & siapkan warna pelangi di sini
-      const angle = Math.atan2(targetMouse.y - player.y, targetMouse.x - player.x);
-      const rainbowColors = ["#ff7675", "#fdcb6e", "#55efc4", "#74b9ff", "#a29bfe", "#fd79a8"];
-
-      if (!isModalOpen) {
-        const distToMouse = Math.hypot(targetMouse.x - player.x, targetMouse.y - player.y);
-        
-        if (distToMouse > 5) {
-          player.x += Math.cos(angle) * player.speed;
-          player.y += Math.sin(angle) * player.speed;
-          
-          snakeTrail.unshift({ x: player.x, y: player.y });
-          const maxSegments = player.length * 5; 
-          if (snakeTrail.length > maxSegments) {
-            snakeTrail.pop();
-          }
-        }
-      }
-
-      // MENGGAMBAR SOAL / BOLA
-      bubbles.forEach(b => {
-        ctx.beginPath();
-        ctx.arc(b.x, b.y, 20, 0, Math.PI * 2);
-        ctx.fillStyle = "#e67e22";
-        ctx.fill();
-        ctx.lineWidth = 3;
-        ctx.strokeStyle = "#f1c40f";
-        ctx.stroke();
-
-        ctx.fillStyle = "#fff";
-        ctx.font = "bold 18px Comic Sans MS";
-        ctx.textAlign = "center";
-        ctx.fillText(b.id, b.x, b.y + 6);
-
-        if (!isModalOpen) {
-          const dist = Math.hypot(player.x - b.x, player.y - b.y);
-          if (dist < 32) triggerModal(b);
-        }
+      db.ref('rooms/' + activeRoomCode + '/students/' + studentKey).set({
+        name: currentPlayerName || "Siswa",
+        score: score || 0,
+        length: (score ? score / 2 + 15 : 15), // Sesuaikan logika panjang ular jika ada
+        correct: correct || 0,
+        updatedAt: Date.now()
+      }).then(() => {
+        showScreen('screen-leaderboard');
       });
-
-      // MENGGAMBAR TUBUH ULAR
-      for (let i = snakeTrail.length - 1; i >= 0; i--) {
-        const segment = snakeTrail[i];
-        const radius = 12; 
-        
-        let colorIndex = Math.floor(i / 6) % rainbowColors.length;
-        
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = rainbowColors[colorIndex];
-
-        ctx.beginPath();
-        ctx.arc(segment.x, segment.y, radius, 0, Math.PI * 2);
-        ctx.fillStyle = rainbowColors[colorIndex];
-        ctx.fill();
-        ctx.strokeStyle = "rgba(0,0,0,0.3)";
-        ctx.lineWidth = 2;
-        ctx.stroke();
-        
-        ctx.shadowBlur = 0;
-      }
-
-      // --- MENGGAMBAR KEPALA ULAR UTAMA ---
-      const headColor = snakeTrail.length > 0 ? rainbowColors[Math.floor((snakeTrail.length - 1) / 6) % rainbowColors.length] : "#ff7675";
-
-      ctx.save();
-      ctx.translate(player.x, player.y);
-      ctx.rotate(angle);
-
-      ctx.shadowBlur = 10;
-      ctx.shadowColor = headColor;
-
-      ctx.beginPath();
-      ctx.arc(0, 0, 12, 0, Math.PI * 2);
-      ctx.fillStyle = headColor;
-      ctx.fill();
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = "rgba(0,0,0,0.3)";
-      ctx.stroke();
-
-      ctx.shadowBlur = 0; 
-
-      // Mata Ular Kiri (Depan)
-      ctx.fillStyle = "#ffffff";
-      ctx.beginPath(); ctx.arc(4, -4, 4, 0, Math.PI * 2); ctx.fill();
-      ctx.strokeStyle = "#2d3436"; ctx.lineWidth = 1; ctx.stroke();
-      ctx.fillStyle = "#2d3436";
-      ctx.beginPath(); ctx.arc(5, -4, 1.5, 0, Math.PI * 2); ctx.fill();
-
-      // Mata Ular Kanan (Depan)
-      ctx.fillStyle = "#ffffff";
-      ctx.beginPath(); ctx.arc(4, 4, 4, 0, Math.PI * 2); ctx.fill();
-      ctx.strokeStyle = "#2d3436"; ctx.lineWidth = 1; ctx.stroke();
-      ctx.fillStyle = "#2d3436";
-      ctx.beginPath(); ctx.arc(5, 4, 1.5, 0, Math.PI * 2); ctx.fill();
-
-      ctx.restore(); 
-
-      // Nama Player di atas kepala
-      ctx.fillStyle = "#ffffff";
-      ctx.font = "bold 12px Comic Sans MS";
-      ctx.textAlign = "center";
-      ctx.fillText(player.name, player.x, player.y - 20);
-
-      document.getElementById('hud-length').innerText = player.length;
-      document.getElementById('hud-score').innerText = player.score;
-      document.getElementById('hud-correct').innerText = player.correct;
-
-      if (!isModalOpen) {
-        animId = requestAnimationFrame(loop);
-      }
-    }
-      
-
-    let currentActiveBubble = null;
-
-    function triggerModal(bubble) {
-      isModalOpen = true;
-      currentActiveBubble = bubble;
-      
-      const modal = document.getElementById('modal-question');
-      document.getElementById('q-text').innerText = bubble.q.q;
-      
-      const optsGrid = document.getElementById('q-options');
-      optsGrid.innerHTML = '';
-      
-      bubble.q.opts.forEach(opt => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'btn-ans';
-        btn.innerText = opt;
-        
-        btn.onclick = (e) => {
-          e.stopPropagation();
-          answerQuestion(opt, bubble.q.ans);
-        };
-
-        optsGrid.appendChild(btn);
-      });
-
-      modal.classList.remove('hidden');
-    }
-
-    function answerQuestion(selected, correct) {
-      document.getElementById('modal-question').classList.add('hidden');
-      
-      if (selected === correct) {
-        player.length += 3;
-        player.score += 10;
-        player.correct++;
-        showResultModal(true, "Correct Answer! Snake lefht +3 cm, +10 points");
-      } else {
-        player.length = Math.max(3, player.length - 3);
-        showResultModal(false, "Incorrect Answer! Snake length -3 cm");
-      }
-
-      bubbles = bubbles.filter(b => b !== currentActiveBubble);
-    }
-
-    function showResultModal(isCorrect, message) {
-      const modal = document.getElementById('modal-result');
-      const box = document.getElementById('result-box');
-      const icon = document.getElementById('result-icon');
-      const title = document.getElementById('result-title');
-      const msg = document.getElementById('result-msg');
-
-      if (isCorrect) {
-        box.style.borderColor = "#00b894";
-        icon.innerText = "🎉";
-        title.innerText = "GREAT! Correct Answer";
-        title.style.color = "#00b894";
-      } else {
-        box.style.borderColor = "#d63031";
-        icon.innerText = "❌";
-        title.innerText = "Try Again!";
-        title.style.color = "#d63031";
-      }
-
-      msg.innerText = message;
-      modal.classList.remove('hidden');
-    }
-
-    function closeResultModal() {
-      document.getElementById('modal-result').classList.add('hidden');
-      
-      if (bubbles.length === 0) {
-        triggerVictory();
-      } else {
-        isModalOpen = false;
-        loop();
-      }
-    }
-
-    function triggerVictory() {
-      isModalOpen = true;
-      saveScoreToFirebase();
-
-      let rankText = "Amazing! You're in 1st place";
-      if (player.correct < questions.length) rankText = "Great effort! Try again";
-
-      document.getElementById('vic-player').innerText = "Player: " + player.name;
-      document.getElementById('vic-score').innerText = player.score;
-      document.getElementById('vic-length').innerText = player.length + " cm";
-      document.getElementById('vic-correct').innerText = player.correct + "/" + questions.length;
-      document.getElementById('vic-rank').innerText = rankText;
-
-      document.getElementById('modal-victory').classList.remove('hidden');
-    }
-
-    function restartGame() {
-      document.getElementById('modal-victory').classList.add('hidden');
-      startGame();
     }
 
     function renderTeacherData(studentsData = null) {
